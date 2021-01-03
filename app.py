@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
@@ -34,19 +35,33 @@ db.create_all()
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
+        try:
 
-        # Get the user's data submitted by the fetch (AJAX)
-        description = request.get_json().get('description')
+            # Get the user's data submitted by the fetch (AJAX)
+            description = request.get_json().get('description')
 
-        # Create a Todo object and add it to the database
-        todo = Todo(description)
-        db.session.add(todo)
-        db.session.commit()
+            # Create a Todo object and add it as pending
+            todo = Todo(description)
+            db.session.add(todo)
+            db.session.commit()
 
-        # Avoid leaving the last request as a POST
-        return jsonify({
-            'description': todo.description
-        })
+        except Exception:
+
+            # Undo any pending changes and log errors
+            print(sys.exc_info())
+            db.session.rollback()
+
+        else:
+
+            # Return the JSON response to the view
+            return jsonify({
+                'description': todo.description
+            })
+
+        finally:
+
+            # Close the connection
+            db.session.close()
 
     # Fetch all todos and update the view
     todos = Todo.query.all()

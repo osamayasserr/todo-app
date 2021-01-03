@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 # Instanciate the flask application
@@ -31,8 +31,22 @@ db.create_all()
 
 
 # Handle the '/' endpoint via the index function
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == "POST":
+
+        # Get the user's data submitted in the form
+        description = request.form.get('description', '')
+
+        # Create a Todo object and add it to the database
+        todo = Todo(description)
+        db.session.add(todo)
+        db.session.commit()
+
+        # Avoid leaving the last request as a POST
+        return redirect(url_for('index'))
+
+    # Fetch all todos and update the view
     todos = Todo.query.all()
     return render_template('index.html', data=todos)
 

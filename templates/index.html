@@ -6,6 +6,10 @@
     <title>Todo App</title>
 </head>
 <body>
+    <form action="/" method="POST">
+        <input type="text" name="description" placeholder="Description">
+        <input type="submit" value="Add todo">
+    </form>
     <ul>
         {% for todo in data %}
         <li>{{ todo.description }}</li>

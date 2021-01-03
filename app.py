@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 # Instanciate the flask application
@@ -35,8 +35,8 @@ db.create_all()
 def index():
     if request.method == "POST":
 
-        # Get the user's data submitted in the form
-        description = request.form.get('description', '')
+        # Get the user's data submitted by the fetch (AJAX)
+        description = request.get_json().get('description')
 
         # Create a Todo object and add it to the database
         todo = Todo(description)
@@ -44,7 +44,9 @@ def index():
         db.session.commit()
 
         # Avoid leaving the last request as a POST
-        return redirect(url_for('index'))
+        return jsonify({
+            'description': todo.description
+        })
 
     # Fetch all todos and update the view
     todos = Todo.query.all()

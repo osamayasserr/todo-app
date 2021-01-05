@@ -56,6 +56,7 @@ def index():
 
             # Return the JSON response to the view
             return jsonify({
+                'id': todo.id,
                 'description': todo.description
             })
 
@@ -65,8 +66,40 @@ def index():
             db.session.close()
 
     # Fetch all todos and update the view
-    todos = Todo.query.all()
+    todos = Todo.query.order_by(Todo.id).all()
     return render_template('index.html', data=todos)
+
+
+# Handle the '/check' endpoint via the index function
+@app.route('/check/<id>', methods=['POST'])
+def check(id):
+    try:
+
+        # Get the user's json data
+        checked = request.get_json()['checked']
+
+        # Update the todo with id = 'id'
+        todo = Todo.query.get(id)
+        todo.completed = checked
+        db.session.commit()
+
+    except Exception:
+
+        # Undo any pending changes and log errors
+        print(sys.exc_info())
+        db.session.rollback()
+
+    else:
+
+        # Return the JSON response to the view
+        return jsonify({
+            'success': True
+        })
+
+    finally:
+
+        # Close the conenection
+        db.session.close()
 
 
 # Run the flask application using the python interperter

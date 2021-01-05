@@ -2,6 +2,7 @@ import os
 import sys
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 # Instanciate the flask application
 app = Flask(__name__)
@@ -13,22 +14,22 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Get the ORM database interface
 db = SQLAlchemy(app)
 
+# Instanciate the migration object
+migrate = Migrate(app, db)
+
 
 # The todos model (Table)
 class Todo(db.Model):
     __tablename__ = "todos"
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String, nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)
 
     def __init__(self, description):
         self.description = description
 
     def __repr__(self):
         return f"<id: {self.id}, description: {self.description}>"
-
-
-# Create the table in the database if it is not existing
-db.create_all()
 
 
 # Handle the '/' endpoint via the index function

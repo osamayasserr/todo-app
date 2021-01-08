@@ -1,7 +1,8 @@
-// Add a new todo to the list using fetch
-document.getElementById('main-form').onsubmit = function (e) {
+// Add a new categorized todo to the list using fetch
+document.getElementById('todos-form').onsubmit = function (e) {
     e.preventDefault();
-    fetch('/', {
+    const category_id = window.location.href.slice(-1);
+    fetch('/categories/' + category_id + '/todos', {
         method: 'POST',
         body: JSON.stringify({
             'description': document.getElementById('description').value

@@ -41,47 +41,65 @@ class Todo(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey(
         'categories.id'), nullable=False)
 
-    def __init__(self, description):
+    def __init__(self, description, category_id):
         self.description = description
+        self.category_id = category_id
 
     def __repr__(self):
         return f"<id: {self.id}, description: {self.description}>"
 
 
-# Handle the '/' endpoint via the index function
-@app.route('/', methods=['GET', 'POST'])
+# Render the homepage HTML
+@app.route('/')
 def index():
-    if request.method == "POST":
-        try:
+    return redirect(url_for('get_todos', category_id=1))
 
-            # Get the user's data submitted by the fetch (AJAX)
-            description = request.get_json().get('description')
 
-            # Create a Todo object and add it as pending
-            todo = Todo(description)
-            db.session.add(todo)
-            db.session.commit()
+# Render the todos with specific category id
+@app.route('/categories/<int:category_id>')
+def get_todos(category_id):
 
-        except Exception:
+    # Fetch all todos with id = 'id'
+    todos = Todo.query.filter(
+        Todo.category_id == category_id).order_by(Todo.id).all()
 
-            # Undo any pending changes and log errors
-            print(sys.exc_info())
-            db.session.rollback()
+    # Fetch all categories
+    categories = Category.query.all()
+    active_category = Category.query.get(category_id)
+    return render_template(
+        'index.html', todos=todos, categories=categories, active_category=active_category)
 
-        else:
 
-            # Return the JSON response to the view
-            return jsonify({
-                'id': todo.id,
-                'description': todo.description
-            })
+# Create a new categorized todo item
+@app.route('/categories/<int:category_id>/todos', methods=['POST'])
+def create_todo(category_id):
+    try:
 
-        finally:
-            db.session.close()
+        # Get the user's data submitted by the fetch (AJAX)
+        description = request.get_json().get('description')
 
-    # Fetch all todos and update the view
-    todos = Todo.query.order_by(Todo.id).all()
-    return render_template('index.html', data=todos)
+        # Create a Todo object and add it as pending
+        todo = Todo(description, category_id)
+        db.session.add(todo)
+        db.session.commit()
+
+    except Exception:
+
+        # Undo any pending changes and log errors
+        print(sys.exc_info())
+        db.session.rollback()
+
+    else:
+
+        # Return the JSON response to the view
+        return jsonify({
+            'id': todo.id,
+            'description': todo.description,
+            'category_id': todo.category_id
+        })
+
+    finally:
+        db.session.close()
 
 
 # Update the completed state of a todo usnig PATCH

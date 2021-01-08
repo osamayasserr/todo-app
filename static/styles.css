@@ -1,6 +1,30 @@
+* {
+    box-sizing: border-box;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
 .hidden {
     display: none;
 }
-ul {
-    list-style: none;
+
+#categories {
+    margin: auto;
+}
+
+#category-wrapper {
+    width: 50%;
+    float: left;
+}
+
+#todo-wrapper {
+    width: 50%;
+    float: right;
+    padding: 1em;
 }

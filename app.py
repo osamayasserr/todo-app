@@ -61,8 +61,6 @@ def index():
             })
 
         finally:
-
-            # Close the connection
             db.session.close()
 
     # Fetch all todos and update the view
@@ -70,8 +68,8 @@ def index():
     return render_template('index.html', data=todos)
 
 
-# Handle the '/check' endpoint via the index function
-@app.route('/check/<id>', methods=['POST'])
+# Update the completed state of a todo usnig PATCH
+@app.route('/todos/<int:id>', methods=['PATCH'])
 def check(id):
     try:
 
@@ -91,14 +89,39 @@ def check(id):
 
     else:
 
-        # Return the JSON response to the view
+        # Return a success message to the view
         return jsonify({
             'success': True
         })
 
     finally:
+        db.session.close()
 
-        # Close the conenection
+
+# Delete a specific todo by id using DELETE
+@app.route('/todos/<int:id>', methods=['DELETE'])
+def delete_todo(id):
+    try:
+
+        # Perform a delete of the todo in the database
+        Todo.query.filter(Todo.id == id).delete()
+        db.session.commit()
+
+    except Exception:
+
+        # Undo any pending changes and log errors
+        print(sys.exc_info())
+        db.session.rollback()
+
+    else:
+
+        # Return a success message
+        return jsonify({
+            'id': id,
+            'success': True
+        })
+
+    finally:
         db.session.close()
 
 

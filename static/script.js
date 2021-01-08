@@ -1,3 +1,4 @@
+// Add a new todo to the list using fetch
 document.getElementById('main-form').onsubmit = function (e) {
     e.preventDefault();
     fetch('/', {
@@ -24,20 +25,19 @@ document.getElementById('main-form').onsubmit = function (e) {
         });
 }
 
+
+// Updated the completed state of a certain todo using fetch
 const checkBoxes = document.querySelectorAll('.check');
 for (let checkBox of checkBoxes) {
     checkBox.onchange = function (e) {
         const checked = e.target.checked;
         const id = e.target.dataset['id'];
-        fetch('/check/' + id, {
-            method: 'POST',
-            body: JSON.stringify({
-                'checked': checked
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+        fetch('/check/' + id,
+            {
+                method: 'POST',
+                body: JSON.stringify({ 'checked': checked }),
+                headers: { 'Content-Type': 'application/json' }
+            })
             .then(function (response) {
                 return response.json();
             })

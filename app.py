@@ -18,12 +18,28 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
+# The categories model (Table)
+class Category(db.Model):
+    __tablename__ = "categories"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    todos = db.relationship('Todo', backref='category')
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"<id: {self.id}, name: {self.name}>"
+
+
 # The todos model (Table)
 class Todo(db.Model):
     __tablename__ = "todos"
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String, nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
+    category_id = db.Column(db.Integer, db.ForeignKey(
+        'categories.id'), nullable=False)
 
     def __init__(self, description):
         self.description = description
